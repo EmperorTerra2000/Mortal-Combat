@@ -1,6 +1,8 @@
 const $arenas = document.querySelector('div.arenas');
+const $randomButton = document.querySelector('.arenas .button');
 
-const scorpion = {
+const player1 = {
+  player: 1,
   name: 'Scorpion',
   hp: 100,
   img: 'http://reactmarathon-api.herokuapp.com/assets/scorpion.gif',
@@ -10,7 +12,8 @@ const scorpion = {
   },
 };
 
-const subzero = {
+const player2 = {
+  player: 2,
   name: 'Subzero',
   hp: 100,
   img: 'http://reactmarathon-api.herokuapp.com/assets/subzero.gif',
@@ -20,21 +23,26 @@ const subzero = {
   },
 };
 
-function createPlayer(className, {name, hp, img}) {
-  // создание элементов документа
-  const $player = document.createElement('div');
-  const $progressBar = document.createElement('div');
-  const $character = document.createElement('div');
-  const $life = document.createElement('div');
-  const $name = document.createElement('div');
-  const $imgCharacter = document.createElement('img');
+// сохдание элемента документа
+function createElement(tag, className) {
+  const $tag = document.createElement(tag);
+  
+  if(className) {
+    $tag.classList.add(className);
+  }
 
-  // добавление класса элементам
-  $player.classList.add(className);
-  $progressBar.classList.add('progressbar');
-  $character.classList.add('character');
-  $life.classList.add('life');
-  $name.classList.add('name');
+  return $tag;
+}
+
+// создание персонажа
+function createPlayer({name, hp, img, player}) {
+  // создание элементов документа
+  const $player = createElement('div', 'player' + player);
+  const $progressBar = createElement('div', 'progressbar');
+  const $character = createElement('div', 'character');
+  const $life = createElement('div', 'life');
+  const $name = createElement('div', 'name');
+  const $imgCharacter = createElement('img');
 
   // построение DOM дерева из объявленных недавно элементов
   $player.appendChild($progressBar);
@@ -44,16 +52,45 @@ function createPlayer(className, {name, hp, img}) {
   $character.appendChild($imgCharacter);
 
   // присваивание необходимых параметров
-  $life.style.width = '100%';
+  $life.style.width = hp + '%';
   $name.innerText = name;
   $life.innerText = hp;
   $imgCharacter.src = img;
 
   // добавление элементов непосредственно к DOM дереву
   $arenas.appendChild($player);
+
+  return $player;
 }
 
-scorpion.attack();
-subzero.attack();
-createPlayer('player1', scorpion);
-createPlayer('player2', subzero);
+// при нажатии на кнопку убывается шкала здоровья
+function changeHP(player) {
+  const $playerLife = document.querySelector('.player' + player.player + ' .life');
+  player.hp -= Math.ceil(Math.random() * 20);
+  $playerLife.style.width = (player.hp <= 0 ? 0 : player.hp) + '%';
+  $playerLife.innerText = player.hp <= 0 ? 0 : player.hp;
+
+  if(player.hp <= 0) {
+    const numberPlayerWins = player.player === 1 ? 2 : 1;// определение победителя
+    $randomButton.disabled = true;
+    $arenas.appendChild(playerWins(numberPlayerWins));
+  }
+}
+
+// текст с победителем
+function playerWins(numberPlayerWins) {
+  const $loseTitle = createElement('div', 'loseTitle');
+  const $playerName = $arenas.querySelector('.player' + numberPlayerWins + ' .progressbar .name');
+
+  $loseTitle.innerText = $playerName.innerText + ' wins';
+
+  return $loseTitle;
+}
+
+$randomButton.addEventListener('click', function() {
+  changeHP(player1);
+  changeHP(player2);
+});
+
+$arenas.appendChild(createPlayer(player1));
+$arenas.appendChild(createPlayer(player2));
