@@ -72,6 +72,7 @@ function changeHP(player) {
 
   if(player.hp <= 0) {
     const numberPlayerWins = player.player === 1 ? 2 : 1;// определение победителя
+    $randomButton.disabled = true;
     $arenas.appendChild(playerWins(numberPlayerWins));
   }
 }
