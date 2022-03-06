@@ -74,7 +74,11 @@ function getRandom(n) {
 }
 
 function changeHP(minusHP){
-  this.hp = this.hp <= 0 ? 0 : this.hp - getRandom(minusHP);
+  this.hp -= getRandom(minusHP);
+
+  if(this.hp <= 0){
+    this.hp = 0;
+  }
 }
 
 function elHP(){
