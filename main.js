@@ -82,10 +82,10 @@ function getRandom(n) {
   return Math.ceil(Math.random() * n);
 }
 
-function changeHP(minusHP) {
+function changeHP(minusHP){
   this.hp -= getRandom(minusHP);
 
-  if(this.hp <= 0) {
+  if(this.hp <= 0){
     this.hp = 0;
   }
 }
