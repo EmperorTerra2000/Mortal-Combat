@@ -10,6 +10,9 @@ const player1 = {
   attack: function() {
     console.log(`${this.name} fight`);
   },
+  changeHP,
+  elHP,
+  renderHP,
 };
 
 const player2 = {
@@ -21,6 +24,9 @@ const player2 = {
   attack: function() {
     console.log(`${this.name} fight`);
   },
+  changeHP,
+  elHP,
+  renderHP,
 };
 
 // сохдание элемента документа
@@ -63,33 +69,77 @@ function createPlayer({name, hp, img, player}) {
   return $player;
 }
 
-// при нажатии на кнопку убывается шкала здоровья
-function changeHP(player) {
-  const $playerLife = document.querySelector('.player' + player.player + ' .life');
-  player.hp -= Math.ceil(Math.random() * 20);
-  $playerLife.style.width = (player.hp <= 0 ? 0 : player.hp) + '%';
-  $playerLife.innerText = player.hp <= 0 ? 0 : player.hp;
+function getRandom(n) {
+  return Math.ceil(Math.random() * n);
+}
 
-  if(player.hp <= 0) {
-    const numberPlayerWins = player.player === 1 ? 2 : 1;// определение победителя
-    $randomButton.disabled = true;
-    $arenas.appendChild(playerWins(numberPlayerWins));
+function changeHP(minusHP){
+  this.hp -= getRandom(minusHP);
+
+  if(this.hp <= 0){
+    this.hp = 0;
   }
 }
 
-// текст с победителем
-function playerWins(numberPlayerWins) {
-  const $loseTitle = createElement('div', 'loseTitle');
-  const $playerName = $arenas.querySelector('.player' + numberPlayerWins + ' .progressbar .name');
+function elHP(){
+  return document.querySelector('.player' + this.player + ' .life');
+}
 
-  $loseTitle.innerText = $playerName.innerText + ' wins';
+function renderHP(){
+  this.elHP().style.width = this.hp + '%';
+  this.elHP().innerText = this.hp;
+}
+
+function createReloadButton() {
+  const $reloadWrap = createElement('div', 'reloadWrap');
+  const $reloadButton = createElement('button', 'button');
+
+  handleClickReloadButton($reloadButton);
+
+  $reloadButton.innerText = 'Restart';
+
+  $reloadWrap.appendChild($reloadButton);
+
+  return $reloadWrap;
+}
+
+function handleClickReloadButton($reloadButton){
+  $reloadButton.addEventListener('click', () => {
+    window.location.reload();
+  });
+}
+
+// текст с победителем
+function playerWins(name) {
+  const $loseTitle = createElement('div', 'loseTitle');
+  if(name) {
+    $loseTitle.innerText = name + ' wins';
+  } else {
+    $loseTitle.innerText = 'draw';
+  }
 
   return $loseTitle;
 }
 
 $randomButton.addEventListener('click', function() {
-  changeHP(player1);
-  changeHP(player2);
+  player1.changeHP(getRandom(20));
+  player1.renderHP.call(player1);
+  player2.changeHP(getRandom(20));
+  player2.renderHP.call(player2);
+
+  if(player1.hp === 0 || player2.hp === 0){
+    $randomButton.disabled = true;
+
+    $arenas.appendChild(createReloadButton());
+  }
+
+  if(player1.hp === 0 && player1.hp < player2.hp) {
+    $arenas.appendChild(playerWins(player2.name));
+  } else if(player1.hp > player2.hp && player2.hp === 0) {
+    $arenas.appendChild(playerWins(player1.name));
+  } else if(player1.hp === 0 && player2.hp === 0) {
+    $arenas.appendChild(playerWins());
+  }
 });
 
 $arenas.appendChild(createPlayer(player1));
