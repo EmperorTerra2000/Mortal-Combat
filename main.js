@@ -140,6 +140,7 @@ function getRandom(number) {
   return Math.ceil(Math.random() * number);
 }
 
+
 /**
  * 
  * @param {number} minusHP 
@@ -147,7 +148,7 @@ function getRandom(number) {
 function changeHP(minusHP) {
   this.hp -= getRandom(minusHP);
 
-  if(this.hp <= 0) {
+  if(this.hp <= 0){
     this.hp = 0;
   }
 }
