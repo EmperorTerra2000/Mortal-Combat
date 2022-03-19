@@ -1,31 +1,31 @@
-import { HIT, ATTACK } from '../constants/index.js';
-import { getRandom, createReloadButton, createElement } from '../utils/index.js';
+import { createReloadButton, createElement } from '../utils/index.js';
 import { generateLogs } from '../logs/index.js';
 import Player from '../players/index.js';
+import Api from '../api/index.js';
 
 class Game {
   constructor({ root }) {
     this.root = root;
     this.form = root.querySelector('.control');
-    this.player2 = new Player({
-      player: 2,
-      name: 'Subzero',
-      hp: 100,
-      img: 'http://reactmarathon-api.herokuapp.com/assets/subzero.gif',
-      weapon: ['Кастеты', 'Катана', 'Гранатамет', 'Бомба'],
-      rootSelector: 'arenas',
-    });
-    this.player1 = new Player({
-      player: 1,
-      name: 'Scorpion',
-      hp: 100,
-      img: 'http://reactmarathon-api.herokuapp.com/assets/scorpion.gif',
-      weapon: ['Стрела', 'Катана', 'Факел'],
-      rootSelector: 'arenas',
-    });
+    this.api = new Api('http://reactmarathon-api.herokuapp.com');
   }
 
-  start = () => {
+  start = async () => {
+    const p1 = JSON.parse(localStorage.getItem('player1'));
+    const p2 = await this.api.getRandomPlayer();
+
+    this.player1 = new Player({
+      ...p1,
+      player: 1,
+      rootSelector: 'arenas',
+    });
+
+    this.player2 = new Player({
+      ...p2,
+      player: 2,
+      rootSelector: 'arenas',
+    });
+
     this.player1.createPlayer();
     this.player2.createPlayer();
 
@@ -43,7 +43,6 @@ class Game {
 
     for (let item of this.form) {
       if (item.checked && item.name === 'hit') {
-        attack.value = getRandom(HIT[item.value]);
         attack.hit = item.value;
       }
 
@@ -55,22 +54,6 @@ class Game {
     }
 
     return attack;
-  };
-
-  /**
-   * определение параметров атак ИИ
-   * @returns {Object}
-   */
-  enemyAttack = () => {
-    const lengthArr = ATTACK.length;
-    const hit = ATTACK[getRandom(lengthArr) - 1];
-    const defence = ATTACK[getRandom(lengthArr) - 1];
-
-    return {
-      value: getRandom(HIT[hit]),
-      hit,
-      defence,
-    };
   };
 
   /**
@@ -90,11 +73,13 @@ class Game {
   };
 
   submitResult = () => {
-    this.form.addEventListener('submit', (evt) => {
+    this.form.addEventListener('submit', async (evt) => {
       evt.preventDefault();
 
-      const { hit: hitEnemy, defence: defenceEnemy, value: valueEnemy } = this.enemyAttack();
-      const { hit, defence, value } = this.myAttack();
+      const fightInfo = await this.api.fightAction(this.myAttack());
+
+      const { hit: hitEnemy, defence: defenceEnemy, value: valueEnemy } = fightInfo.player2;
+      const { hit, defence, value } = fightInfo.player1;
 
       if (hit !== defenceEnemy) {
         this.player2.changeHP(value);
