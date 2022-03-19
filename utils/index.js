@@ -64,6 +64,6 @@ export const createReloadButton = () => {
  */
 export const handleClickReloadButton = ($reloadButton) => {
   $reloadButton.addEventListener('click', () => {
-    window.location.reload();
+    window.location.pathname = 'index.html';
   });
 };
